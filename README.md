@@ -1,2 +1,2 @@
-# aws-telegram-bot
+# AWS Telegram bot
 AWS telegram bot
