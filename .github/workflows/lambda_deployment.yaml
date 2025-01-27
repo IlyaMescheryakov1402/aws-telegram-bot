@@ -1,0 +1,46 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: danielr1996/envsubst-action@1.0.0
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        with:
+          input: .env_template
+          output: src/.env
+      # - name: Install zip tool
+      #   uses: montudor/action-zip@v1
+      # - name: Create Zip file for Lambda function
+      #   run: zip -r code.zip .
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_DEFAULT_REGION: "us-east-1"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt --target src
+      - name: Deploy to AWS Lambda
+        run: |
+          zip -r function.zip src
+          aws lambda update-function-code --function-name arn:aws:lambda:us-east-1:318483981372:function:telegram-to-aws-func --zip-file fileb://function.zip
+      # - name: AWS CLI v2
+      #   uses: imehedi/actions-awscli-v2@latest
+      #   with:
+      #     args: "lambda update-function-code \
+      #       --function-name arn:aws:lambda:us-east-1:318483981372:function:telegram-to-aws-func \
+      #       --zip-file fileb://code.zip"
+      #   env:
+      #     AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      #     AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      #     AWS_DEFAULT_REGION: "us-east-1"
