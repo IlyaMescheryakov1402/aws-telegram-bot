@@ -1,4 +1,4 @@
-from .telegram_api import (
+from .replies import (
     send_reply
 )
 
