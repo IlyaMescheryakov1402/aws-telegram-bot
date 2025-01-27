@@ -1,7 +1,9 @@
 import json
 import os
 from telegram_api import send_reply
+from dotenv import load_dotenv
 
+load_dotenv()
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 
 def lambda_handler(event, context):
