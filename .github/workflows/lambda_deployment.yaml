@@ -29,5 +29,7 @@ jobs:
           pip install -r requirements.txt --target src
       - name: Deploy to AWS Lambda
         run: |
-          cd src && zip -r ../function.zip .
+          cd src
+          zip -r ../function.zip .
+          cd ..
           aws lambda update-function-code --function-name arn:aws:lambda:us-east-1:318483981372:function:telegram-to-aws-func --zip-file fileb://function.zip
