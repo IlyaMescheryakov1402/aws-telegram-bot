@@ -1,8 +1,9 @@
 name: Deploy Lambda Function
 
 on:
-  push:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -10,6 +11,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Linters
+        run: |
+          pip install flake8==7.0.0 black==24.4.2 isort==5.13.2
+          black --line-length=79 --check .
+          isort --profile black --check .
       - name: Create env file
         uses: danielr1996/envsubst-action@1.0.0
         env:

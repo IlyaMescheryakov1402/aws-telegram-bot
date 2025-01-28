@@ -1,7 +1,3 @@
-from .replies import (
-    send_reply
-)
+from .replies import send_reply
 
-__all__ = [
-    "send_reply"
-]
+__all__ = ["send_reply"]
