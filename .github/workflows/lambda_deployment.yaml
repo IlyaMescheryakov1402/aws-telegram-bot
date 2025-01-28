@@ -32,7 +32,7 @@ jobs:
           aws-region: us-east-1
       - name: Install dependencies
         run: |
-          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt --target src
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.10 -r requirements.txt --target src
       - name: Deploy to AWS Lambda
         run: |
           cd src
