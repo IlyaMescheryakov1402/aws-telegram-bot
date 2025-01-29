@@ -41,9 +41,10 @@ def lambda_handler(event, context):
                 model="gpt-4o-mini",
                 titles=titles,
             )
-            title, all_ingredients, recipe = postproc_llm_answer(llm_answer)
+            # title, all_ingredients, recipe = postproc_llm_answer(llm_answer)
             # TODO: Занести это в базу данных, выводить через команду поиск
-            reply_message = f"{title}\n {all_ingredients}\n {recipe}"
+            # reply_message = f"{title}\n {all_ingredients}\n {recipe}"
+            reply_message = llm_answer
     elif message_text.startswith("Search"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
