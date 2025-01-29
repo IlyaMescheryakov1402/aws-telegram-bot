@@ -26,9 +26,9 @@ def lambda_handler(event, context):
     print(json.dumps(body))
 
     reply_message = f"Reply to {message_text}"
-    if message_text.startwith("!Cлышь"):
+    if message_text.startswith("!Cлышь"):
         reply_message = "За углом поссышь!"
-    elif message_text.startwith("!Рецепт"):
+    elif message_text.startswith("!Рецепт"):
         titles = ["Название", "Ингредиенты", "Метод приготовления"]
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
@@ -44,7 +44,7 @@ def lambda_handler(event, context):
             title, all_ingredients, recipe = postproc_llm_answer(llm_answer)
             # TODO: Занести это в базу данных, выводить через команду поиск
             reply_message = f"{title}\n {all_ingredients}\n {recipe}"
-    elif message_text.startwith("!Поиск"):
+    elif message_text.startswith("!Поиск"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
             reply_message = "Неверно указаны ингредиенты"
