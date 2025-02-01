@@ -12,6 +12,7 @@ from telegram_api import send_reply
 
 logger = logging.getLogger(__name__)
 base_config()
+logger.setLevel("INFO")
 
 load_dotenv()
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
