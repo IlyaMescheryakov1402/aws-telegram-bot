@@ -47,7 +47,7 @@ def lambda_handler(event, context):
                 model="gpt-4o-mini",
                 titles=titles,
             )
-            full_recipe = postproc_llm_answer(llm_answer)
+            full_recipe = postproc_llm_answer(llm_answer, titles)
             if full_recipe:
                 add_recipe_to_db(
                     title=full_recipe.title,
