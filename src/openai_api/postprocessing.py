@@ -19,7 +19,7 @@ def postproc_llm_answer(text: str) -> Optional[AIRecipe]:
     # Удаляем лишние пробелы и выводим результат
     results = [match.strip() for match in matches]
     if len(results) == len(AIRecipe.prompt_articles):
-        title = AIRecipe.prompt_articles[0]
+        title = results[0]
         logger.info(f"Title: {title}, preprocessing was done")
         return AIRecipe(*results)
     else:

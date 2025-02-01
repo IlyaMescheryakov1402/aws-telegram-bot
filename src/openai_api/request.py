@@ -15,8 +15,8 @@ def openai_chat_completion(
 ) -> str:
     # ingredient = "лосось,сливки"
     prompt = f"Найди пожалуйста рецепт который содержит следующие \
-        ингредиенты: {ingredient}. Выведи ответ в виде \
-        {' - '.join(titles)}. \
+        ингредиенты: {ingredient}. Выведи ответ в виде нескольких абзацев \
+        {', '.join([f'{title}:' for title in titles])}. \
         Не выводи символы * и #"
     client = OpenAI(api_key=openai_api_key)
     r0 = client.chat.completions.create(
