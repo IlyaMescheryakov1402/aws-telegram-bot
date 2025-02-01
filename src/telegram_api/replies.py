@@ -1,9 +1,15 @@
 import json
+import logging
 
 import urllib3
 
+from logger_utils import base_config
 
-def send_reply(bot_token, chat_id, message):
+logger = logging.getLogger(__name__)
+base_config()
+
+
+def send_reply(bot_token, chat_id, message) -> None:
     reply = {"chat_id": chat_id, "text": message}
     encoded_data = json.dumps(reply).encode("utf-8")
     urllib3.PoolManager().request(
@@ -12,4 +18,5 @@ def send_reply(bot_token, chat_id, message):
         body=encoded_data,
         headers={"Content-Type": "application/json"},
     )
-    print(f"*** Reply : {encoded_data}")
+    logger.info(f"*** Reply : {encoded_data}")
+    return None

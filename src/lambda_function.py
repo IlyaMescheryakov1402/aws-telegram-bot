@@ -1,10 +1,17 @@
 import json
+import logging
 import os
 
 from dotenv import load_dotenv
 
+from amazon_api import add_recipe_to_db
+from logger_utils import base_config
 from openai_api import openai_chat_completion, postproc_llm_answer
+from reply_phrases import ReplyPhrases
 from telegram_api import send_reply
+
+logger = logging.getLogger(__name__)
+base_config()
 
 load_dotenv()
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
@@ -14,25 +21,24 @@ OPENAI_API_TOKEN = os.environ["OPENAI_API_KEY"]
 def lambda_handler(event, context):
     body = json.loads(event["body"])
 
-    print("*** Received event")
+    logger.info("*** Received event")
 
     chat_id = body["message"]["chat"]["id"]
     user_name = body["message"]["from"]["username"]
     message_text = body["message"]["text"]
 
-    print(f"*** chat id: {chat_id}")
-    print(f"*** user name: {user_name}")
-    print(f"*** message text: {message_text}")
-    print(json.dumps(body))
+    logger.info(f"*** chat id: {chat_id}")
+    logger.info(f"*** user name: {user_name}")
+    logger.info(f"*** message text: {message_text}")
+    # logger.info(json.dumps(body))
 
-    # reply_message = f"Reply to {message_text}"
     if message_text.startswith("Ping"):
-        reply_message = "За углом поссышь!"
+        reply_message = ReplyPhrases.ping_pong
     elif message_text.startswith("Recipe"):
         titles = ["Название", "Ингредиенты", "Метод приготовления"]
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
-            reply_message = "Неверно указаны ингредиенты"
+            reply_message = ReplyPhrases.wrong_ingredients
         else:
             ingredients = message_list[1]
             llm_answer = openai_chat_completion(
@@ -41,21 +47,28 @@ def lambda_handler(event, context):
                 model="gpt-4o-mini",
                 titles=titles,
             )
-            # title, all_ingredients, recipe = postproc_llm_answer(llm_answer)
-            # TODO: Занести это в базу данных, выводить через команду поиск
-            # reply_message = f"{title}\n {all_ingredients}\n {recipe}"
-            reply_message = llm_answer
+            full_recipe = postproc_llm_answer(llm_answer)
+            if full_recipe:
+                add_recipe_to_db(
+                    title=full_recipe.title,
+                    ingredients=full_recipe.ingredients,
+                    recipe=full_recipe.recipe,
+                )
+                reply_message = f"{full_recipe.title}\n \
+                    {full_recipe.ingredients}\n {full_recipe.recipe}"
+            else:
+                reply_message = ReplyPhrases.wrong_postprocessing
     elif message_text.startswith("Search"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
-            reply_message = "Неверно указаны ингредиенты"
+            reply_message = ReplyPhrases.wrong_ingredients
         else:
             ingredients = message_list[1]
             # TODO: вывести из базы данных все рецепты,
             # которые содержат указанные ингредиенты
-            reply_message = "Этот функционал пока не разработан!"
+            reply_message = ReplyPhrases.future_feature
     else:
-        reply_message = "Не знаю такой команды, попробуй еще!"
+        reply_message = ReplyPhrases.wrong_command
 
     send_reply(BOT_TOKEN, chat_id, reply_message)
 
