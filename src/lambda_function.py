@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from amazon_api import add_recipe_to_db
 from logger_utils import base_config
-from openai_api import openai_chat_completion, postproc_llm_answer
+from openai_api import AIRecipe, openai_chat_completion, postproc_llm_answer
 from reply_phrases import ReplyPhrases
 from telegram_api import send_reply
 
@@ -36,7 +36,6 @@ def lambda_handler(event, context):
     if message_text.startswith("Ping"):
         reply_message = ReplyPhrases.ping_pong
     elif message_text.startswith("Recipe"):
-        titles = ["Название", "Ингредиенты", "Метод приготовления"]
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
             reply_message = ReplyPhrases.wrong_ingredients
@@ -46,17 +45,12 @@ def lambda_handler(event, context):
                 openai_api_key=OPENAI_API_TOKEN,
                 ingredient=ingredients,
                 model="gpt-4o-mini",
-                titles=titles,
+                titles=AIRecipe.prompt_articles,
             )
-            full_recipe = postproc_llm_answer(llm_answer, titles)
+            full_recipe = postproc_llm_answer(llm_answer)
             if full_recipe:
-                add_recipe_to_db(
-                    title=full_recipe.title,
-                    ingredients=full_recipe.ingredients,
-                    recipe=full_recipe.recipe,
-                )
-                reply_message = f"{full_recipe.title}\n \
-                    {full_recipe.ingredients}\n {full_recipe.recipe}"
+                add_recipe_to_db(full_recipe.to_dict())
+                reply_message = "\n\n".join(full_recipe.to_tuple())
             else:
                 reply_message = ReplyPhrases.wrong_postprocessing
     elif message_text.startswith("Search"):

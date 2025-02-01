@@ -8,17 +8,18 @@ logger = logging.getLogger(__name__)
 base_config()
 
 
-def add_recipe_to_db(title: str, ingredients: str, recipe: str) -> None:
+def add_recipe_to_db(recipe_dict: dict) -> None:
     dynamodb = boto3.client("dynamodb")
-
-    dynamodb.put_item(
-        TableName="aws-telegram-bot",
-        Item={
-            "RecipeID": {"N": "0"},
-            "Title": {"S": title},
-            "Ingredients": {"S": ingredients},
-            "Recipe": {"S": recipe},
-        },
+    RecipeID = (
+        int(
+            dynamodb.scan(TableName="aws-telegram-bot", Limit=1)["Items"][0][
+                "RecipeID"
+            ]["N"]
+        )
+        + 1
     )
-    logger.info(f"Recipe {title} was submitted successfully")
+    item_dict = {k: {"S": v} for k, v in recipe_dict.items()}
+    item_dict.update({"RecipeID": {"N": str(RecipeID)}})
+    dynamodb.put_item(TableName="aws-telegram-bot", Item=item_dict)
+    logger.info(f"Recipe {item_dict['Title']['S']} was submitted successfully")
     return None

@@ -1,21 +1,15 @@
 import logging
 import re
-from typing import List, Optional
+from typing import Optional
 
 from logger_utils import base_config
+from openai_api import AIRecipe
 
 logger = logging.getLogger(__name__)
 base_config()
 
 
-class AIRecipe:
-    def __init__(self, title: str, ingredients: str, recipe: str):
-        self.title = title
-        self.ingredients = ingredients
-        self.recipe = recipe
-
-
-def postproc_llm_answer(text: str, titles: List[str]) -> Optional[AIRecipe]:
+def postproc_llm_answer(text: str) -> Optional[AIRecipe]:
     # Ищем текст после ":" до пустой строки или конца текста
     pattern = r":(.*?)(?=\n\s*\n|$)"
     # Поиск совпадений
@@ -23,10 +17,10 @@ def postproc_llm_answer(text: str, titles: List[str]) -> Optional[AIRecipe]:
     matches = re.findall(pattern, text, re.S)
     # Удаляем лишние пробелы и выводим результат
     results = [match.strip() for match in matches]
-    if len(results) == len(titles):
-        title, ingredients, recipe = results
+    if len(results) == len(AIRecipe.prompt_articles):
+        title = AIRecipe.prompt_articles[0]
         logger.info(f"Title: {title}, preprocessing was done")
-        return AIRecipe(title=title, ingredients=ingredients, recipe=recipe)
+        return AIRecipe(*results)
     else:
         logger.info(f"Preprocessing failed: {results}")
         return None
