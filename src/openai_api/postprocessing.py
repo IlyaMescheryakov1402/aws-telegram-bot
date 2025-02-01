@@ -9,9 +9,10 @@ base_config()
 
 
 class AIRecipe:
-    title: str
-    ingredients: str
-    recipe: str
+    def __init__(self, title: str, ingredients: str, recipe: str):
+        self.title = title
+        self.ingredients = ingredients
+        self.recipe = recipe
 
 
 def postproc_llm_answer(text: str, titles: List[str]) -> Optional[AIRecipe]:
