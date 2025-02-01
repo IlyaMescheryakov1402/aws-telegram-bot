@@ -13,8 +13,15 @@ class AIRecipe:
             "Ingredients": self.ingredients,
             "Recipe": self.recipe,
         }
-        assert len(self.DB_dict) == len(self.prompt_articles), "Check articles"
         self.reply = (self.title, self.ingredients, self.recipe)
+        self.check_attributes()
+
+    @classmethod
+    def from_dict(cls, input_d: dict):
+        return cls(input_d["Title"], input_d["Ingredients"], input_d["Recipe"])
+
+    def check_attributes(self):
+        assert len(self.DB_dict) == len(self.prompt_articles), "Check articles"
         assert len(self.reply) == len(self.prompt_articles), "Check articles"
 
     def to_dict(self):

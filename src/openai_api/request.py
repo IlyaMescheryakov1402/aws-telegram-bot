@@ -7,6 +7,7 @@ from logger_utils import base_config
 
 logger = logging.getLogger(__name__)
 base_config()
+logger.setLevel("INFO")
 
 
 def openai_chat_completion(

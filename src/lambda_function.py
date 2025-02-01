@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from amazon_api import add_recipe_to_db
+from amazon_api import add_recipe_to_db, get_recipe_by_id
 from logger_utils import base_config
 from openai_api import AIRecipe, openai_chat_completion, postproc_llm_answer
 from reply_phrases import ReplyPhrases
@@ -17,6 +17,7 @@ logger.setLevel("INFO")
 load_dotenv()
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 OPENAI_API_TOKEN = os.environ["OPENAI_API_KEY"]
+AWS_DYNAMODB_TABLE = os.environ["AWS_DYNAMODB_TABLE"]
 
 
 def lambda_handler(event, context):
@@ -33,9 +34,9 @@ def lambda_handler(event, context):
     logger.info(f"*** message text: {message_text}")
     # logger.info(json.dumps(body))
 
-    if message_text.startswith("Ping"):
+    if message_text.startswith("PING"):
         reply_message = ReplyPhrases.ping_pong
-    elif message_text.startswith("Recipe"):
+    elif message_text.startswith("RECIPE"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
             reply_message = ReplyPhrases.wrong_ingredients
@@ -49,11 +50,11 @@ def lambda_handler(event, context):
             )
             full_recipe = postproc_llm_answer(llm_answer)
             if full_recipe:
-                add_recipe_to_db(full_recipe.to_dict())
+                add_recipe_to_db(full_recipe.to_dict(), AWS_DYNAMODB_TABLE)
                 reply_message = "\n\n".join(full_recipe.to_tuple())
             else:
                 reply_message = ReplyPhrases.wrong_postprocessing
-    elif message_text.startswith("Search"):
+    elif message_text.startswith("SEARCH"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
             reply_message = ReplyPhrases.wrong_ingredients
@@ -62,6 +63,17 @@ def lambda_handler(event, context):
             # TODO: вывести из базы данных все рецепты,
             # которые содержат указанные ингредиенты
             reply_message = ReplyPhrases.future_feature
+    elif message_text.startswith("GET"):
+        message_list = message_text.split(maxsplit=1)
+        if len(message_list) == 1:
+            reply_message = ReplyPhrases.wrong_id
+        else:
+            recipe_id = message_list[1]
+            full_recipe = get_recipe_by_id(recipe_id, AWS_DYNAMODB_TABLE)
+            if full_recipe:
+                reply_message = "\n\n".join(full_recipe.to_tuple())
+            else:
+                reply_message = ReplyPhrases.wrong_id
     else:
         reply_message = ReplyPhrases.wrong_command
 

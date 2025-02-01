@@ -4,3 +4,4 @@ class ReplyPhrases:
     wrong_postprocessing: str = "LLM postprocessing was done incorrectly"
     future_feature: str = "This feature is not developed yet"
     wrong_command: str = "Wrong command, try again!"
+    wrong_id: str = "Wrong ID of receipt, try again!"

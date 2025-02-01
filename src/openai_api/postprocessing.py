@@ -7,6 +7,7 @@ from openai_api import AIRecipe
 
 logger = logging.getLogger(__name__)
 base_config()
+logger.setLevel("INFO")
 
 
 def postproc_llm_answer(text: str) -> Optional[AIRecipe]:
