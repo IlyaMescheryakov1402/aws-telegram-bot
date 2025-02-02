@@ -18,6 +18,7 @@ load_dotenv()
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 OPENAI_API_TOKEN = os.environ["OPENAI_API_KEY"]
 AWS_DYNAMODB_TABLE = os.environ["AWS_DYNAMODB_TABLE"]
+OPENAI_MODEL = os.environ["OPENAI_MODEL"]
 
 
 def lambda_handler(event, context):
@@ -44,7 +45,7 @@ def lambda_handler(event, context):
             llm_answer = openai_chat_completion(
                 openai_api_key=OPENAI_API_TOKEN,
                 ingredient=ingredients,
-                model="gpt-4o-mini",
+                model=OPENAI_MODEL,
                 titles=AIRecipe.prompt_articles,
             )
             full_recipe = postproc_llm_answer(llm_answer)

@@ -61,6 +61,6 @@ def search_recipe(ingredient: str, table_name: str) -> Optional[str]:
             recipe_id = item["RecipeID"]["N"]
             recipe_title = item["Title"]["S"]
             reply_message += f"{recipe_id} - {recipe_title}\n"
-            return reply_message
+        return reply_message
     else:
         return None
