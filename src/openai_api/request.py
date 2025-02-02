@@ -13,7 +13,6 @@ logger.setLevel("INFO")
 def openai_chat_completion(
     openai_api_key: str, ingredient: str, model: str, titles: List
 ) -> str:
-    # ingredient = "лосось,сливки"
     prompt = f"Найди пожалуйста рецепт который содержит следующие \
         ингредиенты: {ingredient}. Выведи ответ в виде нескольких абзацев \
         {', '.join([f'{title}:' for title in titles])}. \
@@ -22,5 +21,5 @@ def openai_chat_completion(
     r0 = client.chat.completions.create(
         model=model, messages=[{"role": "user", "content": prompt}]
     )
-    # logger.info(f"ChatCompletion: {r0.choices[0].message.content}")
+    logger.info(f"ChatCompletion: {r0.choices[0].message.content}")
     return r0.choices[0].message.content

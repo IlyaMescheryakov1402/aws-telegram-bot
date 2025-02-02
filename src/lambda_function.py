@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from amazon_api import add_recipe_to_db, get_recipe_by_id
+from amazon_api import add_recipe_to_db, get_recipe_by_id, search_recipe
 from logger_utils import base_config
 from openai_api import AIRecipe, openai_chat_completion, postproc_llm_answer
 from reply_phrases import ReplyPhrases
@@ -32,7 +32,6 @@ def lambda_handler(event, context):
     logger.info(f"*** chat id: {chat_id}")
     logger.info(f"*** user name: {user_name}")
     logger.info(f"*** message text: {message_text}")
-    # logger.info(json.dumps(body))
 
     if message_text.startswith("PING"):
         reply_message = ReplyPhrases.ping_pong
@@ -59,10 +58,12 @@ def lambda_handler(event, context):
         if len(message_list) == 1:
             reply_message = ReplyPhrases.wrong_ingredients
         else:
-            ingredients = message_list[1]
-            # TODO: вывести из базы данных все рецепты,
-            # которые содержат указанные ингредиенты
-            reply_message = ReplyPhrases.future_feature
+            ingredient = message_list[1]
+            reply = search_recipe(ingredient, AWS_DYNAMODB_TABLE)
+            if reply:
+                reply_message = reply
+            else:
+                reply_message = ReplyPhrases.empty_search
     elif message_text.startswith("GET"):
         message_list = message_text.split(maxsplit=1)
         if len(message_list) == 1:
