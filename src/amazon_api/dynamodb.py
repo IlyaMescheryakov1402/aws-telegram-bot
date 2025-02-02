@@ -13,14 +13,8 @@ logger.setLevel("INFO")
 
 def add_recipe_to_db(recipe_dict: dict, table_name: str) -> None:
     dynamodb = boto3.client("dynamodb")
-    RecipeID = (
-        int(
-            dynamodb.scan(TableName=table_name, Limit=1)["Items"][0][
-                "RecipeID"
-            ]["N"]
-        )
-        + 1
-    )
+    items = dynamodb.scan(TableName=table_name, Limit=100).get("Items")
+    RecipeID = max([int(item["RecipeID"]["N"]) for item in items]) + 1
     item_dict = {k: {"S": v} for k, v in recipe_dict.items()}
     item_dict.update({"RecipeID": {"N": str(RecipeID)}})
     dynamodb.put_item(TableName=table_name, Item=item_dict)
